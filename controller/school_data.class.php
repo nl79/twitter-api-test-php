@@ -41,13 +41,13 @@ class school_data extends controller {
         $db = $this->getDB(); 
         
         #Import the csv file data.
-
-        #function for creating a new table
-        $createTable = function($tableName) {
-            
-        }; 
+            #directory
+        $dir = 'data/final/';
         
-       
+        #extension
+        $ext = '.csv';
+        
+  
         #field name directory
         $varlistData = array('hd2011.varlist', 'effy2011.varlist', 'f1011_f1a.varlist'); 
         
@@ -88,21 +88,39 @@ class school_data extends controller {
         
         #import the varlist data
         foreach($varlistData as $file) {
-            $this->import('varlist_data', $file);
+            //$this->import('varlist_data', $file);
+            #build the filepath
+            $filepath = $dir . $file . $ext; 
+            $this->import('varlist_data', $csv = new \library\csvfile($filepath, true), true);
+             
         }
        
+       
+        /*
+         *build the tables for the school data and import.
+         */
+        $first = array_shift($schoolData);
         
         
-        //$csv = new \library\csvfile($listFile, true);
+        
+        /*
+         *build the table for the financial data and import.
+         */
         
         
+        /*
+         *build the table for enrollment data and import.
+         */
+             
+             
         //header("Location:./?page=school_data");
         exit; 
     }
     
-    private function import($tablename, $filename) {
+    private function import($tablename, $csv, $ignore = false) {
         
-        $db = $this->getDB(); 
+        $db = $this->getDB();
+        /*
         #directory
         $dir = 'data/final/';
         
@@ -119,29 +137,26 @@ class school_data extends controller {
             echo("here"); 
             var_dump($e->getMessage()); 
         }
-        
-        /*
-         *get the table schema to build the insert field list.
-         */
-        $sql = 'DESCRIBE ' . $tablename;
-        
-        #build the statement. 
-        $stmt = $db->prepare($sql);
-        
-        #execute the statement 
-        $stmt->execute();
-        
-        $fields = $stmt->fetchAll();
-        
+        */
+        #get the csv headings.   
+        $fields = $csv->getHeadings(); 
         
         
         /*
          *loop and build a sql insert query.
          */
-        $sql = "INSERT INTO " . $tablename . '(';
+        $sql = "INSERT ";
+        
+        #if ignore flag is set, add the appropriate directive. 
+        if($ignore) {
+            $sql .= ' IGNORE ';
+        }
+        
+        $sql .= "INTO " . $tablename . '(';
         
         foreach($fields as $field) {
-            $sql .= $field['Field'] . ','; 
+            //$sql .= $field['Field'] . ',';
+            $sql .= '`' . $field . '`,'; 
         }
         
         #trim off the last ,
@@ -161,7 +176,8 @@ class school_data extends controller {
             $values = '(';
             
             foreach($row as $field) {
-                $values .= "'" . $field . "',"; 
+                //$values .= "'" . $field . "',";
+                $values .= $db->quote($field) . ','; 
             }
             $values = rtrim($values, ','); 
             $values .= ')';
@@ -176,13 +192,18 @@ class school_data extends controller {
                 $sql .= ','; 
             }
         }
-        
-        echo('<pre>'); 
-        var_dump($sql);
-        var_dump($data); 
-        echo('</pre>'); 
+         
+        #prepare the sql statement
+        $stmt = $db->prepare($sql);
+        if($stmt->execute()) {
+            return true;
+        } else {
+            return false; 
+        }
+        //var_dump($stmt->errorInfo());
     }
     
-    
-    
+    private function createTable($fields) {
+        
+    }
 }
