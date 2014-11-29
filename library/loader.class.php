@@ -24,6 +24,7 @@ class loader {
             #return true; 
             return true; 
         } else {
+            
             throw new \Exception('Class: ' . $class . " - Not Found");
             return false; 
         }

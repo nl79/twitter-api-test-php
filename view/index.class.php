@@ -47,16 +47,16 @@ class index extends view {
                 #count used to index each record for faster look up.
                 $index = 0; 
                 foreach($list as $row) {
-                
+                    
                         #build the anchor tag.
                         /*
                         $a = \library\html::a(array('href' => "./?UNITID=" . $row['UNITID'] . '&ac=info',
                                               'data' => $row['INSTNM']));
                                               */
-                        $a = \library\html::a(array('href' => "./?UNITID=" .$row['UNITID'] .
+                        $a = \library\html::a(array('href' => "./?unitid=" .$row['unitid'] .
                                                     '&ac=info&id=' . $index .
                                                     '&page=index',
-                                              'data' => $row['INSTNM']));
+                                              'data' => $row['instnm']));
                         
                         #increment index
                         $index++;

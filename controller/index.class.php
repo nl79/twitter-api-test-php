@@ -32,14 +32,14 @@ class index extends controller{
         #view object data array. 
         $vData = array('list' => $schoolList); 
           
-        if(isset($_REQUEST['UNITID']) && is_numeric($_REQUEST['UNITID'])) {
+        if(isset($_REQUEST['unitid']) && is_numeric($_REQUEST['unitid'])) {
             
                 #load the headings csv. 
                 $headingcsv = new \library\csvfile($headingsFile, true);
                 //$headingList = $headingcsv->getData();
                         
                 #extract every varTitle field from the headings collection
-                $headings = $headingcsv->getFieldsByName('varTitle'); 
+                $headings = $headingcsv->getFieldsByName('vartitle'); 
                 
                 #get the unit id. 
                 $id = isset($_REQUEST['id']) && is_numeric($_REQUEST['id']) ? $_REQUEST['id'] : 0;

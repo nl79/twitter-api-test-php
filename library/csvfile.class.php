@@ -10,7 +10,9 @@ class csvfile {
 	
 	private $_headings = null; 		#array containing the headings if exist. 
 	
-	private $_data = null; 		#array containing the data rows. 
+	private $_data = null; 		#array containing the data rows.
+	
+	
 
 	public function __construct($filepath, $headings = false) {
 	
@@ -171,7 +173,13 @@ class csvfile {
 				if($this->_headExists && $hRead == false) {
 				
 					#set the row as the headings array
-					$this->_headings = $row; 
+					#convert the headings to lowercase
+					
+					//$this->_headings = $row;
+					$this->_headings = array();
+					foreach($row as $heading) {
+						$this->_headings[] = strtolower($heading); 
+					}
 					
 					#set the read flag to true
 					$hRead = true;
@@ -199,7 +207,7 @@ class csvfile {
 
 		} else {
 			#throw an exception 
-			throw new Exception('Invalid Filepath supplied: ' . $this->_filepath); 
+			throw new \Exception('Invalid Filepath supplied: ' . $this->_filepath); 
 			return null; 
 		}
 	}

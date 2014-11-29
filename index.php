@@ -21,10 +21,13 @@ $page = 'controller\\' . $page;
  *Try to load the extension class.
  *If fails, load the error class.
  */
+
+
 try {
     $controller = new $page();
+    
 } catch (Exception $e) {
-    $controller = new controller\error(); 
+    $controller = new controller\error($e->getMessage()); 
     //echo($e->getMessage()); 
    
 }

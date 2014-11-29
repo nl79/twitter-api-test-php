@@ -6,7 +6,7 @@ abstract class controller {
     #save the action value
     protected $_action = ""; 
     
-    public function __construct() {
+    public function __construct($args = null) {
         
         #get the action parameter.
         $action = isset($_REQUEST['ac']) && !empty($_REQUEST['ac']) ? $_REQUEST['ac'] : 'index';
@@ -18,14 +18,14 @@ abstract class controller {
             $this->_action = $action;
             
             #call the method. 
-            $this->$method();
+            $this->$method($args);
             
         } else {
             #set the action to default
             $this->_action = 'index';
             
             #else call the default method. 
-            $this->defaultAction(); 
+            $this->defaultAction($args); 
         }
     }
 }
