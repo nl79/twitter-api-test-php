@@ -99,7 +99,11 @@ class school_data extends controller {
         /*
          *build the tables for the school data and import.
          */
-        $first = array_shift($schoolData);
+        $file = array_shift($schoolData);
+        $filepath = $dir . $file . $ext; 
+        $this->createTable('institution_data',$csv = new \library\csvfile($filepath, true));
+        
+        
         
         
         
@@ -120,27 +124,9 @@ class school_data extends controller {
     private function import($tablename, $csv, $ignore = false) {
         
         $db = $this->getDB();
-        /*
-        #directory
-        $dir = 'data/final/';
-        
-        #extension
-        $ext = '.csv';
-        
-        #build the filepath
-        $filepath = $dir . $filename . $ext; 
-        
-        #create a csv object
-        try{    
-            $csv = new \library\csvfile($filepath, true);
-        } catch(\Exception $e) {
-            echo("here"); 
-            var_dump($e->getMessage()); 
-        }
-        */
+       
         #get the csv headings.   
         $fields = $csv->getHeadings(); 
-        
         
         /*
          *loop and build a sql insert query.
@@ -203,7 +189,20 @@ class school_data extends controller {
         //var_dump($stmt->errorInfo());
     }
     
-    private function createTable($fields) {
+    private function createTable($tablename, $csv) {
+        $db = $this->getDB();
         
+        #get the varname data from the database.
+        $sql = "SELECT * FROM varlist_data";
+        $stmt = $db->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+        
+        echo('<pre>');
+        var_dump($result);
+        echo('</pre>'); 
+        
+        
+        #get the csv heading. 
     }
 }
