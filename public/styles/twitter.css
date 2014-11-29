@@ -1,0 +1,50 @@
+
+#div-twitter-toolbar {
+    border: 1px solid gray; 
+    width: 80%;
+    margin: 0px auto;
+    background-color: #F0F0F0; 
+}
+
+#form-tweet {
+    width: 80%;
+    margin: 0px auto; 
+}
+.align-vertical * {
+    vertical-align: middle; 
+}
+#textarea-status {
+    width: 70%;
+    height: 80px;
+    margin: 10px;
+    padding: 15px;
+    font-size: 125%; 
+    border: 2px solid gray;
+    border-radius: 25px; 
+}
+
+#button-tweet {
+    font-size: 130%;
+    padding: 10px;
+    border-radius: 15px;
+    border: 1px solid green; 
+}
+
+#ul-links {
+    padding: 10px; 
+}
+
+#ul-links li {
+    display: block;
+    list-style-type: none;
+    float: left;
+    margin-left: 15px; 
+}
+
+#ul-links li a {
+    text-decoration: none;
+    font-size: 125%;
+}
+#ul-links li a:hover {
+    color: orange; 
+}
