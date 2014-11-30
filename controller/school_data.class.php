@@ -11,6 +11,7 @@ class school_data extends controller {
         $db = null; 
         
         try {
+           // $db = new \PDO($dsn, $user, $password, array( PDO::MYSQL_ATTR_LOCAL_INFILE => true));
             $db = new \PDO($dsn, $user, $password); 
         } catch (\PDOException $e) {
             echo('Connection Failed: ' . $e->getMessage()); 
@@ -65,7 +66,7 @@ class school_data extends controller {
          *import the varllist data which will be used to create the
          *data tables
          */
-        
+     
         #create table sql.
         $sql = "DROP TABLE IF EXISTS varlist_data;
                 CREATE TABLE varlist_data (
@@ -96,11 +97,12 @@ class school_data extends controller {
         }
         
         unset($csv); 
-       
+     
         
         /*
          *build the tables for the school data and import.
          */
+   
         $file = array_shift($schoolData);
         $filepath = $dir . $file . $ext;
         #additional table field for the data year
@@ -119,11 +121,47 @@ class school_data extends controller {
                                                       'fields' => array($field)));
        
         unset($csv);
-       
+      
         /*
          *build the table for the financial data and import.
          */
+     
+        #extract the headers. 
+        $headers = $this->getHeaders($financialData);
         
+        #additional table field for the data year
+        $field = array('fieldname' => 'YEAR',
+                       'datatype' => 'int(4)',
+                       'null' => 'NULL');
+        
+        $this->createTable('financial_data',$headers, array($field));
+        
+        #import the data
+        $csv = new \library\csvfile($this->buildFilepath(array_shift($financialData)), true);
+       
+        #import the data into the newly created table.
+        #addition field to store the date
+        $field = array('fieldname' => 'YEAR',
+                       'value' => 2010); 
+        $this->import('financial_data', $csv, array('ignore' => true,
+                                                      'fields' => array($field)));
+        unset($csv);
+        
+        
+        $csv = new \library\csvfile($this->buildFilepath(array_shift($financialData)), true);
+       
+        #import the data into the newly created table.
+        #addition field to store the date
+        $field = array('fieldname' => 'YEAR',
+                       'value' => 2009); 
+        $this->import('financial_data', $csv, array('ignore' => true,
+                                                      'fields' => array($field)));
+        unset($csv);
+        
+       
+        #separate tables
+        {
+        /*
         $file = array_shift($financialData);
         $filepath = $dir . $file . $ext;
         #additional table field for the data year
@@ -162,31 +200,127 @@ class school_data extends controller {
         $this->import('financial_data_0910', $csv, array('ignore' => true,
                                                       'fields' => array($field)));
         unset($csv);
+       */
        
+        }
+       
+        
         /*
          *build the table for enrollment data and import.
          */
-        $file = array_shift($enrollmentData);
-        $filepath = $dir . $file . $ext;
+        
+        $headings = $this->getHeaders($enrollmentData);
+        
+        
         #additional table field for the data year
         $field = array('fieldname' => 'YEAR',
                        'datatype' => 'int(4)',
                        'null' => 'NULL');
-        $csv = new \library\csvfile($filepath, true);
-    
-        $this->createTable('enrollment_data_2010',$csv->getHeadings(), array($field));
+       
+        $this->createTable('enrollment_data',$headings, array($field));
         
-        #import the data into the newly created table.
-        #addition field to store the date
+        
+         /*
         $field = array('fieldname' => 'YEAR',
-                       'value' => 2010); 
-        $this->import('enrollment_data_2010', $csv, array('ignore' => true,
-                                                      'fields' => array($field)));
-        unset($csv);
-             
-             
+                       'value' => 2010);
+        
+        $this->importCSV('enrollment_data',
+                         $this->buildFilepath(array_shift($enrollmentData)),
+                         $headings,
+                         array('fields' => array($field))); 
+        */
+        #import the data.       
         //header("Location:./?page=school_data");
         exit; 
+    }
+    
+    /*
+    private function importCSV($tablename, $filepath, $fields, $args = null) {
+        
+        #build the sql
+        $sql = "LOAD DATA LOCAL INFILE '" . $filepath . "'
+                INTO TABLE " . $tablename . " 
+                FIELDS TERMINATED BY ','
+                    ENCLOSED BY '\"'
+                LINES TERMINATED BY '\\n'
+                IGNORE 1 LINES ";
+                
+        #add the fields.
+        $sql .= '(' . implode(',', $fields);
+        
+        #check if additional fieds are provided.
+        if(isset($args['fields']) && is_array($args['fields'])) {
+            foreach($args['fields'] as $field) {
+                $sql .= ',`' . $field['fieldname'] . '`';  
+            }
+        }
+        
+        $sql .= ') '; 
+        
+        #if additional fields are provided add them, and set the values.
+         #check if additional fieds are provided.
+        if(isset($args['fields']) && is_array($args['fields'])) {
+            $sql .= " SET ";
+            
+            foreach($args['fields'] as $field) {
+                $sql .= ' `' . $field['fieldname'] . '` = ' . $field['value'] . ','; 
+            }
+            
+        }
+        
+        $sql = rtrim($sql, ',');
+        
+        $db = $this->getDB();
+        
+        $stmt = $db->prepare($sql);
+        
+        if($stmt->execute()) {
+            return true; 
+        } else {
+            echo('<pre>');
+            var_dump($stmt->errorInfo());
+            echo('</pre>');
+            
+            return false; 
+        }
+        
+        
+    }
+    
+    */
+    
+    private function getHeaders($list) {
+        
+        if(is_array($list) && !empty($list)) {
+            
+            $headers = array();
+            
+            foreach($list as $filename) {
+                
+                $filepath = $this->buildFilepath($filename);
+                
+                $file = fopen($filepath, 'r');
+                $arr = explode(',' ,fgets($file));
+                
+                foreach($arr as $field) {
+                    $headers[trim($field)] = trim($field); 
+                }
+                
+            }
+        }
+        
+        return $headers; 
+    }
+    
+    private function buildFilepath($filename) {
+        #directory
+        $dir = 'data/final/';
+        
+        #extension
+        $ext = '.csv';
+        
+        return $dir . $filename . $ext;
+        
     }
     
     private function import($tablename, $csv, $args = array()) {
@@ -201,9 +335,13 @@ class school_data extends controller {
          *if the number is very high, divide the import
          *queries into multiple sets.
          */
-        $collection = $csv->getData();
-        #items in a set
+        
+        
+         #items in a set
         $setCount = 500;
+        
+        $collection = $csv->getData();
+       
         
         $max = count($collection) / $setCount; 
         for($i = 0; $i < $max; $i++) {
@@ -419,8 +557,8 @@ class school_data extends controller {
         }
         
         #trim off the trailing comma
-        //$sql = rtrim($sql, ','); 
-        $sql .= ' PRIMARY KEY (UNITID)'; 
+        $sql = rtrim($sql, ','); 
+        //$sql .= ' PRIMARY KEY (UNITID)'; 
         
         $sql .= ' ); ';
         

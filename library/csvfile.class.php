@@ -12,18 +12,30 @@ class csvfile {
 	
 	private $_data = null; 		#array containing the data rows.
 	
+	private $_readall = true; 
+	
 	
 
-	public function __construct($filepath, $headings = false) {
+	public function __construct($filepath = null, $headings = false, $readall = true) {
+		
+		$this->_readall = is_bool($readall) ? $readall : false;
 	
-			#validate the filepath and headings.  
-			$this->_filepath = is_string($filepath) && !empty($filepath) ? $filepath : null;
+		#validate the filepath and headings.  
+		//$this->_filepath = is_string($filepath) && !empty($filepath) ? $filepath : null;
+		
+		#if the filepath is supplied and is valid, load the file.
+		if(is_string($filepath) && !empty($filepath)) {
+			$this->_filepath = $filepath;
 			
-			$this->_headExists = is_bool($headings) ? $headings : false;  
+			$this->_headExists = is_bool($headings) ? $headings : false;
 			
 			#load the csv file
-			$this->loadFile(); 
-	
+			if(is_bool($this->_readall) && $this->_readall == true) {
+				$this->loadFile();
+			}
+			
+		}
+			
 	}
 	
 	/*
@@ -36,12 +48,41 @@ class csvfile {
 	}
 	
 	/*
+	 *@method setHeadings() - Sets the headings array.
+	 *@param Array $headings - Array contaning the CSV headings.
+	 *@return Boolean - return true on success.
+	 */
+	public function setHeadings($headings) {
+		if(is_array($headings) && !empty($headings)) {
+			$this->_headings = $headings;
+			return true; 
+		}
+		
+		return false; 
+	}
+	
+	/*
 	 *@method getData() - returns the data array.
 	 *@access public
+	 *@param Int $count - Number of rows to get. 
 	 *@return Mixed - returns an array on success or null on failure
 	 */
-	public function getData() {
+	public function getData($count = null) {
 		return $this->_data; 
+	}
+	
+	/*
+	 *@method setData() - sets the data array.
+	 *@param Array $data - Array containing the data.
+	 *@return Boolean - returns true on success or false on failure.
+	 */
+	public function setData($data) {
+		if(is_array($data) && !empty($data)) {
+			$this->_data = $data;
+			return true; 
+		}
+		
+		return false; 
 	}
 	
 	/*
