@@ -166,6 +166,23 @@ class school_data extends controller {
         /*
          *build the table for enrollment data and import.
          */
+        $file = array_shift($enrollmentData);
+        $filepath = $dir . $file . $ext;
+        #additional table field for the data year
+        $field = array('fieldname' => 'YEAR',
+                       'datatype' => 'int(4)',
+                       'null' => 'NULL');
+        $csv = new \library\csvfile($filepath, true);
+    
+        $this->createTable('enrollment_data_2010',$csv->getHeadings(), array($field));
+        
+        #import the data into the newly created table.
+        #addition field to store the date
+        $field = array('fieldname' => 'YEAR',
+                       'value' => 2010); 
+        $this->import('enrollment_data_2010', $csv, array('ignore' => true,
+                                                      'fields' => array($field)));
+        unset($csv);
              
              
         //header("Location:./?page=school_data");
