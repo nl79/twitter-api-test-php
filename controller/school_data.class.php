@@ -33,8 +33,9 @@ class school_data extends controller {
         $stmt->execute(); 
         
         #create a new View
-        $view = new \view\school_data($this->_action, $stmt->fetchAll(\PDO::FETCH_ASSOC));
-        
+        //$view = new \view\school_data($this->_action, $stmt->fetchAll(\PDO::FETCH_ASSOC));
+        $view = new \view\school_data($this->_action, $stmt->fetchAll());
+       
     }
     
     public function importAction() {
@@ -170,6 +171,7 @@ class school_data extends controller {
        
         $this->createTable('enrollment_data',$headings, array($field));
         */
+        
         #import the data.       
         //header("Location:./?page=school_data");
         exit; 
