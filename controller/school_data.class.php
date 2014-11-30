@@ -90,12 +90,14 @@ class school_data extends controller {
         foreach($varlistData as $file) {
             //$this->import('varlist_data', $file);
             #build the filepath
-            $filepath = $dir . $file . $ext; 
-            $this->import('varlist_data', $csv = new \library\csvfile($filepath, true), array('ignore' => true));
-             
+            $filepath = $dir . $file . $ext;
+            $csv = new \library\csvfile($filepath, true);
+            $this->import('varlist_data',$csv , array('ignore' => true)); 
         }
+        
+        unset($csv); 
        
-       
+        
         /*
          *build the tables for the school data and import.
          */
@@ -107,7 +109,7 @@ class school_data extends controller {
                        'null' => 'NULL');
         $csv = new \library\csvfile($filepath, true);
         
-        $this->createTable('institution_data',$csv, array($field));
+        $this->createTable('institution_data',$csv->getHeadings(), array($field));
         
         #import the data into the newly created table.
         #addition field to store the date
@@ -115,16 +117,52 @@ class school_data extends controller {
                        'value' => 2011); 
         $this->import('institution_data', $csv, array('ignore' => true,
                                                       'fields' => array($field)));
-        
-        
-        
-        
-        
+       
+        unset($csv);
+       
         /*
          *build the table for the financial data and import.
          */
         
+        $file = array_shift($financialData);
+        $filepath = $dir . $file . $ext;
+        #additional table field for the data year
+        $field = array('fieldname' => 'YEAR',
+                       'datatype' => 'int(4)',
+                       'null' => 'NULL');
+        $csv = new \library\csvfile($filepath, true);
+    
+        $this->createTable('financial_data_1011',$csv->getHeadings(), array($field));
         
+        #import the data into the newly created table.
+        #addition field to store the date
+        $field = array('fieldname' => 'YEAR',
+                       'value' => 1011); 
+        $this->import('financial_data_1011', $csv, array('ignore' => true,
+                                                      'fields' => array($field)));
+        unset($csv);
+        
+        
+        
+        
+        $file = array_shift($financialData);
+        $filepath = $dir . $file . $ext;
+        #additional table field for the data year
+        $field = array('fieldname' => 'YEAR',
+                       'datatype' => 'int(4)',
+                       'null' => 'NULL');
+        $csv = new \library\csvfile($filepath, true);
+    
+        $this->createTable('financial_data_0910',$csv->getHeadings(), array($field));
+        
+        #import the data into the newly created table.
+        #addition field to store the date
+        $field = array('fieldname' => 'YEAR',
+                       'value' => 0910); 
+        $this->import('financial_data_0910', $csv, array('ignore' => true,
+                                                      'fields' => array($field)));
+        unset($csv);
+       
         /*
          *build the table for enrollment data and import.
          */
@@ -171,7 +209,7 @@ class school_data extends controller {
             #setup the field names for the insert query. 
             foreach($fields as $field) {
                 //$sql .= $field['Field'] . ',';
-                $sql .= '`' . $field . '`,'; 
+                $sql .= '`' . trim($field) . '`,'; 
             }
             
             #check if any additional fields were supplied
@@ -223,6 +261,12 @@ class school_data extends controller {
             $stmt = $db->prepare($sql);
             #execute
             $result = $stmt->execute();
+            /*
+            echo('<pre>');
+            var_dump($sql);
+            var_dump($stmt->errorInfo()); 
+            echo('</pre>');
+            */
         }
         
         
@@ -291,7 +335,7 @@ class school_data extends controller {
         */
     }
     
-    private function createTable($tablename, $csv, $fields = array()) {
+    private function createTable($tablename, $headings, $fields = array()) {
         $db = $this->getDB();
         
         #get the varname data from the database.
@@ -310,8 +354,6 @@ class school_data extends controller {
                 $hash[strtolower($field['varname'])] = $field; 
             }
         }
-        #get the csv heading.
-        $headings = $csv->getHeadings();
         
         #build the table creation query
         $sql = 'DROP TABLE IF EXISTS ' . $tablename . '; ';
@@ -346,6 +388,9 @@ class school_data extends controller {
                 $sql .= ' NULL';
                 
                 $sql .= ','; 
+            } else {
+                 
+                $sql .= $field . ' varchar(10) NULL,'; 
             }
         }
         
@@ -361,12 +406,13 @@ class school_data extends controller {
         $sql .= ' PRIMARY KEY (UNITID)'; 
         
         $sql .= ' ); ';
-         
+        
         #prepare the statement
         $stmt = $db->prepare($sql);
         if($stmt->execute()) {
             return true;
         } else {
+
             return false;
         }
         
