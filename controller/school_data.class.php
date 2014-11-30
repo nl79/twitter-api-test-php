@@ -91,7 +91,7 @@ class school_data extends controller {
             //$this->import('varlist_data', $file);
             #build the filepath
             $filepath = $dir . $file . $ext; 
-            $this->import('varlist_data', $csv = new \library\csvfile($filepath, true), true);
+            $this->import('varlist_data', $csv = new \library\csvfile($filepath, true), array('ignore' => true));
              
         }
        
@@ -100,8 +100,21 @@ class school_data extends controller {
          *build the tables for the school data and import.
          */
         $file = array_shift($schoolData);
-        $filepath = $dir . $file . $ext; 
-        $this->createTable('institution_data',$csv = new \library\csvfile($filepath, true));
+        $filepath = $dir . $file . $ext;
+        #additional table field for the data year
+        $field = array('fieldname' => 'YEAR',
+                       'datatype' => 'int(4)',
+                       'null' => 'NULL');
+        $csv = new \library\csvfile($filepath, true);
+        
+        $this->createTable('institution_data',$csv, array($field));
+        
+        #import the data into the newly created table.
+        #addition field to store the date
+        $field = array('fieldname' => 'YEAR',
+                       'value' => 2011); 
+        $this->import('institution_data', $csv, array('ignore' => true,
+                                                      'fields' => array($field)));
         
         
         
@@ -121,7 +134,7 @@ class school_data extends controller {
         exit; 
     }
     
-    private function import($tablename, $csv, $ignore = false) {
+    private function import($tablename, $csv, $args = array()) {
         
         $db = $this->getDB();
        
@@ -129,8 +142,96 @@ class school_data extends controller {
         $fields = $csv->getHeadings(); 
         
         /*
+         *count the number of record in the set,
+         *if the number is very high, divide the import
+         *queries into multiple sets.
+         */
+        $collection = $csv->getData();
+        #items in a set
+        $setCount = 500;
+        
+        $max = count($collection) / $setCount; 
+        for($i = 0; $i < $max; $i++) {
+            #set the start boundary. 
+            $start = $setCount * $i;
+            
+            #slice off the dataset
+            $data = array_slice($collection, $start, $setCount);
+            
+            #build the sql and execute the query.
+            $sql = "INSERT ";
+        
+            #if ignore flag is set, add the appropriate directive. 
+            if(isset($args['ignore'])) {
+                $sql .= ' IGNORE ';
+            }
+            
+            $sql .= "INTO " . $tablename . '(';
+            
+            #setup the field names for the insert query. 
+            foreach($fields as $field) {
+                //$sql .= $field['Field'] . ',';
+                $sql .= '`' . $field . '`,'; 
+            }
+            
+            #check if any additional fields were supplied
+            if(isset($args['fields'])) {
+                foreach($args['fields'] as $field) {
+                    $sql .=  '`' . $field['fieldname'] . '`,'; 
+                }
+            }
+            #trim off the last ,
+            $sql = rtrim($sql, ',');
+            
+            $sql .= ") VALUES ";
+
+            #get the data count. 
+            $len = count($data);
+            $count = 0; 
+            
+            
+            foreach($data as $row) {
+                $values = '(';
+                
+                foreach($row as $field) {
+                    //$values .= "'" . $field . "',";
+                    $values .= $db->quote($field) . ',';
+                }
+                
+                #check if any additional fields were supplied
+                if(isset($args['fields'])) {
+                    foreach($args['fields'] as $field) {
+                        $values .= $field['value'] . ','; 
+                    }
+                }
+                
+                $values = rtrim($values, ','); 
+                $values .= ')';
+                
+                $sql .= $values;
+                
+                #increment count
+                $count++;
+                
+                #if the count is less then the length, concatenate a comma. 
+                if ($count < $len) {
+                    $sql .= ','; 
+                }
+            }
+ 
+            #prepare the sql statement
+            $stmt = $db->prepare($sql);
+            #execute
+            $result = $stmt->execute();
+        }
+        
+        
+        
+        
+        /*
          *loop and build a sql insert query.
          */
+        /*
         $sql = "INSERT ";
         
         #if ignore flag is set, add the appropriate directive. 
@@ -187,9 +288,10 @@ class school_data extends controller {
             return false; 
         }
         //var_dump($stmt->errorInfo());
+        */
     }
     
-    private function createTable($tablename, $csv) {
+    private function createTable($tablename, $csv, $fields = array()) {
         $db = $this->getDB();
         
         #get the varname data from the database.
@@ -198,11 +300,81 @@ class school_data extends controller {
         $stmt->execute();
         $result = $stmt->fetchAll();
         
+        /*
+         *build an asscciative array using the varname as key.
+         */
+        $hash = array();
+        
+        if(is_array($result) && !empty($result)) {
+            foreach($result as $field) {
+                $hash[strtolower($field['varname'])] = $field; 
+            }
+        }
+        #get the csv heading.
+        $headings = $csv->getHeadings();
+        
+        #build the table creation query
+        $sql = 'DROP TABLE IF EXISTS ' . $tablename . '; ';
+        $sql .= 'CREATE TABLE ' . $tablename . '( ';
+        
+        
+        foreach($headings as $field) {
+            
+            if(isset($hash[$field])) {
+                $properties = $hash[$field];
+                #field name
+                
+                $sql .= $properties['varname'] . ' ';
+                
+                #type
+                switch($properties['datatype']) {
+                    case 'N':
+                        $sql .= ' int(' . $properties['fieldwidth'] . ') '; 
+                        break;
+                    
+                    case 'A':
+                    
+                        $sql .= is_numeric($properties['fieldwidth']) &&
+                            $properties['fieldwidth'] <= 255 ? ' char(' . $properties['fieldwidth'] . ') ' : ' text' ; 
+                        break;
+                    
+                    default:
+                        break; 
+                }
+                
+                #allows null
+                $sql .= ' NULL';
+                
+                $sql .= ','; 
+            }
+        }
+        
+        #add any additional custom fields.
+        if(is_array($fields) && !empty($fields)) {
+            foreach($fields as $field) {
+                $sql .= implode(' ', $field) . ','; 
+            }
+        }
+        
+        #trim off the trailing comma
+        //$sql = rtrim($sql, ','); 
+        $sql .= ' PRIMARY KEY (UNITID)'; 
+        
+        $sql .= ' ); ';
+         
+        #prepare the statement
+        $stmt = $db->prepare($sql);
+        if($stmt->execute()) {
+            return true;
+        } else {
+            return false;
+        }
+        
+        /*
         echo('<pre>');
-        var_dump($result);
-        echo('</pre>'); 
+        echo($sql); 
+        echo('</pre>');
+        */
         
-        
-        #get the csv heading. 
     }
 }
