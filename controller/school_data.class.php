@@ -5,11 +5,11 @@ class school_data extends controller {
     
     private function getDB() {
         
-        /*
-        $dsn = 'mysql:dbname=school_data;host=localhost';
-        $user = 'root';
-        $password = 'nar1110';
-        */
+       
+        $dsn = 'mysql:dbname=nl79;host=sql.njit.edu';
+        $user = 'nl79';
+        $password = 'do1z6Qpxa';
+        
         $db = null; 
         
         try {
