@@ -4,10 +4,12 @@ namespace controller;
 class school_data extends controller {
     
     private function getDB() {
+        
+        /*
         $dsn = 'mysql:dbname=school_data;host=localhost';
         $user = 'root';
         $password = 'nar1110';
-        
+        */
         $db = null; 
         
         try {
