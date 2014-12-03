@@ -39,8 +39,64 @@ class school_data extends controller {
         $view = new \view\school_data($this->_action, $stmt->fetchAll());
        
     }
+   
     
-    public function importAction() {
+    public function reportAction() {
+        
+        #get the report type
+        $type = isset($_REQUEST['type']) && !empty($_REQUEST['type']) ? $_REQUEST['type'] : '';
+        
+        #switch statement for the report type
+        switch($type) {
+            case 'enrollment':
+                /*
+                *Create a web page that shows the colleges that have the highest enrollment.
+                */
+                #EFYTOTLT - the total enrollment acount. 
+                $sql = 'select * from enrollment_data order by EFYTOTLT desc'; 
+                    
+                break;
+            
+            case 'liabilities':
+                /*
+                *Create a web page that that lists the colleges with the largest amount of total liabilities.
+                */
+                
+                break;
+            
+            case 'assets':
+                /*
+                *Create a web page that lists the colleges with the largest amount of net assets.
+                */
+                
+                break;
+            
+            case 'assets_per_student':
+                /*
+                *Create a web page that lists the colleges with the largest amount of net assets per student.
+                */
+                
+                break;
+            
+            case 'enrollment_rate':
+                /*
+                *Create a web page that shows the colleges with the largest percentage increase
+                *in enrollment between the years of 2011 and 2010.
+                */
+                
+                
+                break;
+            
+            default:
+                
+                break; 
+        }
+        
+        $view = new \view\school_data($this->_action, $stmt->fetchAll()); 
+
+    }
+    
+    public function fullimportAction() {
         
         $db = $this->getDB(); 
         
@@ -178,6 +234,7 @@ class school_data extends controller {
         //header("Location:./?page=school_data");
         exit; 
     }
+    
      
     private function getHeaders($list) {
         

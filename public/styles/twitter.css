@@ -35,9 +35,8 @@
 }
 
 #ul-links li {
-    display: block;
+    display: inline-block;
     list-style-type: none;
-    float: left;
     margin-left: 15px; 
 }
 

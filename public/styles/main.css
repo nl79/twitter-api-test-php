@@ -7,8 +7,7 @@ body {
     margin-bottom: 15px; 
 }
 #ul-main-menu li {
-    display: block;
-    float: left;
+    display: inline-block; 
     margin: 15px; 
 }
 

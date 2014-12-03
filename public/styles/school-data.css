@@ -1,0 +1,18 @@
+div.div-school-data-content-wrapper {
+    padding: 0px 25px; 
+}
+
+div.div-school-data-nav-main {
+    border: 1px solid gray;
+    background-color: #F8F8F8;
+}
+
+ul.ul-school-data-nav-main {
+    
+    list-style-type: none;
+    
+}
+ul.ul-school-data-nav-main li {
+    display: inline-block; 
+    margin: 0px 25px;    
+}
