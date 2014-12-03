@@ -53,7 +53,11 @@ class school_data extends controller {
                 *Create a web page that shows the colleges that have the highest enrollment.
                 */
                 #EFYTOTLT - the total enrollment acount. 
-                $sql = 'select * from enrollment_data order by EFYTOTLT desc'; 
+                $sql = 'select t1.UNITID, t1.EFYTOTLT as `Total Enrollment`, t1.`YEAR`, t2.INSTNM, t2.ADDR, t2.CITY, t2.STABBR, t2.ZIP 
+                        from enrollment_data as t1, institution_data as t2 
+                        where t1.UNITID = t2.UNITID 
+                        order by t1.EFYTOTLT 
+                        desc limit 100'; 
                     
                 break;
             
