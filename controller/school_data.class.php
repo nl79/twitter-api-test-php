@@ -71,13 +71,25 @@ class school_data extends controller {
                 /*
                 *Create a web page that that lists the colleges with the largest amount of total liabilities.
                 */
-                
+                #F1A13 - total liabilities. 
+                $sql = 'select t1.UNITID, t1.F1A13 as `Total Liabilities`, t1.`YEAR`, t2.INSTNM, t2.ADDR, t2.CITY, t2.STABBR, t2.ZIP 
+                        from financial_data as t1, institution_data as t2 
+                        where t1.UNITID = t2.UNITID 
+                        order by t1.F1A13 
+                        desc limit 100';
+                        
                 break;
             
             case 'assets':
                 /*
                 *Create a web page that lists the colleges with the largest amount of net assets.
                 */
+                #F1A18 - total net assets
+                $sql = 'select t1.UNITID, t1.F1A18 as `Net Assets`, t1.`YEAR`, t2.INSTNM, t2.ADDR, t2.CITY, t2.STABBR, t2.ZIP 
+                        from financial_data as t1, institution_data as t2 
+                        where t1.UNITID = t2.UNITID 
+                        order by t1.F1A18 
+                        desc limit 100';
                 
                 break;
             
@@ -85,6 +97,8 @@ class school_data extends controller {
                 /*
                 *Create a web page that lists the colleges with the largest amount of net assets per student.
                 */
+                #financial_data.F1A18 - total net assets
+                #enrollment_data.EFYTOTLT - the total enrollment acount.
                 
                 break;
             
