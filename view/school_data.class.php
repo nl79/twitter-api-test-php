@@ -31,7 +31,7 @@ class school_data extends view {
             $html .= $this->mainNav();
             
             #build the data container
-            $html .= "<div id='div-content'></div>"; 
+            $html .= "<div id='div-content' class='div-school-data-content'></div>"; 
             
             
         }
@@ -45,6 +45,16 @@ class school_data extends view {
     
     public function reportView($data) {
         
+        /*
+         *if data is an array and is not empty, build a table.
+         */
+        if(is_array($data) && !empty($data)) {
+            $html = \library\html::table(array('id'=>'table-school-data-report',
+                                           'border' => '1',
+                                           'data' => $data), true, false);
+        }
+        
+        $this->_output .= $html; 
     }
     
     private function mainNav() {

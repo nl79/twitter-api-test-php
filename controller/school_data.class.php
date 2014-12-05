@@ -43,8 +43,14 @@ class school_data extends controller {
     
     public function reportAction() {
         
+        #get the db connection
+        $dbh = $this->getDB(); 
+        
         #get the report type
         $type = isset($_REQUEST['type']) && !empty($_REQUEST['type']) ? $_REQUEST['type'] : '';
+        
+        #initialize the sql string
+        $sql = ""; 
         
         #switch statement for the report type
         switch($type) {
@@ -58,7 +64,7 @@ class school_data extends controller {
                         where t1.UNITID = t2.UNITID 
                         order by t1.EFYTOTLT 
                         desc limit 100'; 
-                    
+                
                 break;
             
             case 'liabilities':
@@ -95,8 +101,14 @@ class school_data extends controller {
                 
                 break; 
         }
+         
+        #prepare the statement
+        $stmt = $dbh->prepare($sql);
         
-        $view = new \view\school_data($this->_action, $stmt->fetchAll()); 
+        #execute the query
+        $stmt->execute(); 
+        
+        $view = new \view\school_data($this->_action, $stmt->fetchAll(\PDO::FETCH_ASSOC)); 
 
     }
     

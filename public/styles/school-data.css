@@ -16,3 +16,12 @@ ul.ul-school-data-nav-main li {
     display: inline-block; 
     margin: 0px 25px;    
 }
+
+div.div-school-data-content {
+    max-height: 500px; 
+    overflow-y: scroll; 
+}
+
+table#table-school-data-report {
+    width: 100%; 
+}
