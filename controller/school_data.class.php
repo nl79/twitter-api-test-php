@@ -99,11 +99,28 @@ class school_data extends controller {
                 */
                 #financial_data.F1A18 - total net assets
                 #enrollment_data.EFYTOTLT - the total enrollment acount.
+                
+                /*
+                 *SELECT t1.UNITID , (t2.F1A18/t3.EFYTOTLT) AS assets_per_student, t2.`YEAR`, t1.INSTNM, t1.ADDR, t1.CITY, t1.STABBR, t1.ZIP 
+                    FROM institution_data AS t1 INNER JOIN financial_data AS t2 ON t1.UNITID = t2.UNITID inner join enrollment_data as t3 on t2.UNITID = t3.UNITID
+                    where t3.LSTUDY = 999
+                    order by assets_per_student desc
+                    limit 100;
+                */
+                
+                /*
+                 *
                 $sql = 'select t1.UNITID, (t1.F1A18/t3.EFYTOTLT) as `net assets per student`, t1.`YEAR`, t2.INSTNM, t2.ADDR, t2.CITY, t2.STABBR, t2.ZIP 
                         from financial_data as t1, institution_data as t2, enrollment_data as t3
                         where t1.UNITID = t2.UNITID
                         limit 100';
+                */
                 
+                $sql = 'SELECT t1.UNITID ,t2.F1A18 AS "NET ASSETS", t3.EFYTOTLT AS "ENROLLMENT", (t2.F1A18/t3.EFYTOTLT) AS assets_per_student, t2.`YEAR`, t1.INSTNM, t1.ADDR, t1.CITY, t1.STABBR, t1.ZIP 
+                        FROM institution_data AS t1 inner JOIN financial_data AS t2 ON t1.UNITID = t2.UNITID inner join enrollment_data as t3 on t2.UNITID = t3.UNITID
+                        where t3.LSTUDY = 999 and  t2.`YEAR` = t3.`YEAR`
+                        order by assets_per_student desc
+                        limit 100'; 
                 break;
             
             case 'enrollment_rate':
