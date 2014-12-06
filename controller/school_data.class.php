@@ -128,8 +128,20 @@ class school_data extends controller {
                 *Create a web page that shows the colleges with the largest percentage increase
                 *in enrollment between the years of 2011 and 2010.
                 */
+                /*
+                $sql = 'select t1.UNITID, (((tbl2.EFYTOTLT - tbl1.EFYTOTLT)/ tbl1.EFYTOTLT) * 100) as ratio,t1.INSTNM, t1.ADDR, t1.CITY, t1.STABBR, t1.ZIP
+                        FROM institution_data as t1 inner join 
+                        (select UNITID, EFYTOTLT from enrollment_data where `YEAR` = 2010 and LSTUDY = 999) as tbl1 on t1.UNITID = tbl1.UNITID 
+                        INNER JOIN   
+                        (select UNITID, EFYTOTLT from enrollment_data where `YEAR` = 2011 AND LSTUDY = 999) as tbl2 ON tbl1.UNITID = tbl2.UNITID'; 
+                */
                 
-                
+                $sql = 'select t1.UNITID, (((tbl2.EFYTOTLT - tbl1.EFYTOTLT)/ tbl1.EFYTOTLT) * 100) as `Enrollment % Change`,t1.INSTNM, t1.ADDR, t1.CITY, t1.STABBR, t1.ZIP
+                        FROM institution_data as t1 inner join 
+                        (select UNITID, EFYTOTLT from enrollment_data where `YEAR` = 2010 and LSTUDY = 999) as tbl1 on t1.UNITID = tbl1.UNITID 
+                        INNER JOIN   
+                        (select UNITID, EFYTOTLT from enrollment_data where `YEAR` = 2011 AND LSTUDY = 999) as tbl2 ON tbl1.UNITID = tbl2.UNITID
+                        ORDER BY `Enrollment % Change` desc';
                 break;
             
             default:
