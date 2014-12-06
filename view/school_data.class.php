@@ -69,7 +69,7 @@ class school_data extends view {
         
             foreach($links as $link) {
                 $html .= "<li class='school-data-nav-link'>"; 
-                $html .= "<a target='div-content'
+                $html .= "<a class='a-link' target='div-content'
                             href='./?page=school_data&ac=report&type=" . strtolower($link) . "'>"; 
                 $html .= str_replace('_', ' ', $link) .
                 '</a></li>'; 
